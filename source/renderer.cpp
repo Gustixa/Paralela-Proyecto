@@ -71,6 +71,7 @@ vector<Circle> initializeCircles(const uint16_t& numCircles, const uint16_t resx
 		circles[i].velocity = vec2((rand() % 500) - 250, (rand() % 500) - 250);
 		circles[i].radius = (rand() % 10) + 1;
 		circles[i].mass = pi<float>() * pow(circles[i].radius, 2);
+		circles[i].color = ivec3(255,255,255);
 	}
 	return circles;
 }
@@ -89,9 +90,11 @@ void checkBoundingBoxCollision(Circle& circle, const vec2& minBounds, const vec2
 }
 
 void simulateStep(vector<Circle>& circles, const vec2& minBounds, const vec2& maxBounds, const float& deltaTime) {
-#pragma omp parallel for
+	#pragma omp parallel for
 	for (int i = 0; i < circles.size(); ++i) {
+		#pragma omp critical
 		circles[i].position += circles[i].velocity * deltaTime;
+		circles[i].color = ivec3(std::max(int(abs(circles[i].velocity.x) * 2), 255), 100, std::max(int(abs(circles[i].velocity.y) * 2), 255));
 		checkBoundingBoxCollision(circles[i], minBounds, maxBounds);
 	}
 }

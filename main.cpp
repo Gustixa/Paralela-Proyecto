@@ -59,7 +59,7 @@ void render(vector<Circle>& circles) {
 
 	simulateStep(circles, vec2(0,0), vec2(RESX, RESY), delta_time);
 	for (const Circle& circle : circles) {
-		renderCircle(renderer, RESX, RESY, static_cast<ivec2>(circle.position), circle.radius, ivec3(255));
+		renderCircle(renderer, RESX, RESY, static_cast<ivec2>(circle.position), circle.radius, circle.color);
 	}
 
 

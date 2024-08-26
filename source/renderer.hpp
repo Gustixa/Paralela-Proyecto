@@ -9,6 +9,7 @@ void renderCircle(SDL_Renderer* renderer, const uint16_t resx, const uint16_t re
 struct Circle {
 	vec2 position;
 	vec2 velocity;
+	ivec3 color;
 	float radius;
 	float mass;
 };
