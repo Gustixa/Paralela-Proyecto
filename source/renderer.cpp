@@ -94,7 +94,7 @@ void simulateStep(vector<Circle>& circles, const vec2& minBounds, const vec2& ma
 	for (int i = 0; i < circles.size(); ++i) {
 		#pragma omp critical
 		circles[i].position += circles[i].velocity * deltaTime;
-		circles[i].color = ivec3(std::max(int(abs(circles[i].velocity.x) * 2), 255), 100, std::max(int(abs(circles[i].velocity.y) * 2), 255));
+		circles[i].color = ivec3(std::min(int(abs(circles[i].velocity.x) * 2), 255), std::min(int(circles[i].position.x), 255), std::min(int(abs(circles[i].velocity.y) * 2), 255));
 		checkBoundingBoxCollision(circles[i], minBounds, maxBounds);
 	}
 }
