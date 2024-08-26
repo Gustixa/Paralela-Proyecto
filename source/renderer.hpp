@@ -1,0 +1,18 @@
+#pragma once
+
+#include "include.hpp"
+
+void renderPoint(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const ivec2& point, const ivec3& color);
+void renderLine(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const vec2& pointA, const vec2& pointB, const ivec3& color);
+void renderCircle(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const vec2 center, const uint16_t radius, const ivec3& color);
+
+struct Circle {
+	vec2 position;
+	vec2 velocity;
+	float radius;
+	float mass;
+};
+
+vector<Circle> initializeCircles(const uint16_t& numCircles, const uint16_t resx, const uint16_t resy);
+void checkBoundingBoxCollision(Circle& circle, const vec2& minBounds, const vec2& maxBounds);
+void simulateStep(vector<Circle>& circles, const vec2& minBounds, const vec2& maxBounds, const float& deltaTime);
