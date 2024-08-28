@@ -24,7 +24,7 @@ void init(const uint16_t RESX, const uint16_t RESY);
 void render(vector<Circle>& circles);
 
 /**
- * @brief Función principal del programa
+ * Función principal del programa
  */
 int main(int argc, char* argv[]) {
     init(RESX, RESY);
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
 }
 
 /**
- * @brief Inicializa SDL y crea la ventana y el renderizador
+ * Inicializa SDL y crea la ventana y el renderizador
  */
 void init(const uint16_t RESX, const uint16_t RESY) {
     SDL_Init(SDL_INIT_VIDEO);
@@ -55,14 +55,14 @@ void init(const uint16_t RESX, const uint16_t RESY) {
 }
 
 /**
- * @brief Rota un vector 2D
+ * Rota un vector 2D
  */
 vec2 rot(vec2 uv,float a){
     return vec2(uv.x*cos(a)-uv.y*sin(a),uv.y*cos(a)+uv.x*sin(a));
 }
 
 /**
- * @brief Renderiza y actualiza la simulación
+ * Renderiza y actualiza la simulación
  */
 void render(vector<Circle>& circles) {
     // Actualiza tiempos y FPS
