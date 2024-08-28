@@ -131,6 +131,7 @@
       <AdditionalIncludeDirectories>C:\Programs\Coding\Lib\glm 0.9.9.8;C:\Programs\Coding\Lib\sdl 2.30.6\include;$(SolutionDir)\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

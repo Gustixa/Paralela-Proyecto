@@ -4,9 +4,9 @@
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
 
-const uint16_t RESX = 1200;
-const uint16_t RESY = 800;
-const uint16_t numCircles = 100;
+const uint16_t RESX = 1800;
+const uint16_t RESY = 1000;
+const uint16_t numCircles = 2048;
 
 double update_time = 0.2;
 double window_time = 0;
@@ -19,12 +19,19 @@ void init(const uint16_t RESX, const uint16_t RESY);
 void render(vector<Circle>& circles);
 
 int main(int argc, char* argv[]) {
+
 	init(RESX, RESY);
 	bool running = true;
 
 	vector<Circle> circles = initializeCircles(numCircles, RESX, RESY);
 
 	while (running) {
+		SDL_Event event;
+		while (SDL_PollEvent(&event)) {
+			if (event.type == SDL_QUIT) {
+				running = false;
+			}
+		}
 		render(circles);
 	}
 	return 0;
@@ -57,11 +64,29 @@ void render(vector<Circle>& circles) {
 
 
 
+	//const int maxIterations = 8;
+	//#pragma omp parallel for collapse(2)
+	//for (int x = 0; x < RESX; x++) {
+	//	for (int y = 0; y < RESY; y++) {
+	//		vec2 uv = (vec2(x,y) - (vec2(RESX, RESY) / 2.0f)) / float(RESX);
+	//		uv *= sin(float(run_time)) * 0.5f + 1.5f;
+	//
+	//		for(int i = 0; i < maxIterations; i++){
+	//			uv *= 2.1f;
+	//			uv = rot(run_time) * uv;
+	//			uv = abs(uv);
+	//			uv -= 0.5f;
+	//		}
+	//
+	//		#pragma omp critical
+	//		renderPoint(renderer, RESX, RESY, uvec2(x,y), static_cast<ivec3>(vec3(length(uv) < 0.4f) * 255.0f));
+	//	}
+	//}
+
 	simulateStep(circles, vec2(0,0), vec2(RESX, RESY), delta_time);
 	for (const Circle& circle : circles) {
-		renderCircle(renderer, RESX, RESY, static_cast<ivec2>(circle.position), circle.radius, circle.color);
+		renderCircle(renderer, RESX, RESY, static_cast<uvec2>(circle.position), circle.radius, circle.color);
 	}
-
 
 
 	SDL_RenderPresent(renderer);

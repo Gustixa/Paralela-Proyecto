@@ -1,13 +1,13 @@
 #include "renderer.hpp"
 
-void renderPoint(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const ivec2& point, const ivec3& color) {
+void renderPoint(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const uvec2& point, const ivec3& color) {
 	if (point.x < resx && point.x >= 0 && point.y < resy && point.y >= 0) {
 		SDL_SetRenderDrawColor(renderer, color.x, color.y , color.z, 255);
 		SDL_RenderDrawPoint(renderer, point.x, resy - point.y);
 	}
 }
 
-void renderLine(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const vec2& pointA, const vec2& pointB, const ivec3& color) {
+void renderLine(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const uvec2& pointA, uvec2& pointB, const ivec3& color) {
 	int dx = abs(pointB.x - pointA.x);
 	int dy = abs(pointB.y - pointA.y);
 	int err = dx - dy;
@@ -31,7 +31,7 @@ void renderLine(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy
 	}
 }
 
-void renderCircle(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const vec2 center, const uint16_t radius, const ivec3& color) {
+void renderCircle(SDL_Renderer* renderer, const uint16_t resx, const uint16_t resy, const uvec2 center, const uint16_t radius, const ivec3& color) {
 	int offsetX, offsetY, d;
 	offsetX = 0;
 	offsetY = radius;
@@ -64,6 +64,12 @@ void renderCircle(SDL_Renderer* renderer, const uint16_t resx, const uint16_t re
 	}
 }
 
+mat2 rot(float a) {
+	float c = cos(a);
+	float s = sin(a);
+	return mat2(c, -s, s, c);
+}
+
 vector<Circle> initializeCircles(const uint16_t& numCircles, const uint16_t resx, const uint16_t resy) {
 	vector<Circle> circles(numCircles);
 	for (uint16_t i = 0; i < numCircles; ++i) {
@@ -89,12 +95,36 @@ void checkBoundingBoxCollision(Circle& circle, const vec2& minBounds, const vec2
 	}
 }
 
+vec3 palette(const float& time) {
+	vec3 d = vec3(0.263, 0.416, 0.557);
+	return cos(2.5f * (time + d));
+}
+
+vec3 getPattern(vec2 uv, const float& steps, const float& time) {
+	vec2 uv_0 = uv;
+	vec3 val = vec3(0.0);
+	for (float i = 0.0f; i < steps; i++) {
+		uv = glm::fract(uv * 1.5f) - 0.5f;
+
+		float d = length(uv) * exp(-length(uv_0));
+		vec3 col = palette(length(uv_0) + i * 0.4f + time * 0.4f);
+
+		d = sin(d * 8.0f + time) / 8.0f;
+		d = abs(d);
+
+		d = pow(0.01f / d, 1.2f);
+
+		val += col * d;
+	}
+	return val;
+}
+
 void simulateStep(vector<Circle>& circles, const vec2& minBounds, const vec2& maxBounds, const float& deltaTime) {
 	#pragma omp parallel for
 	for (int i = 0; i < circles.size(); ++i) {
-		#pragma omp critical
 		circles[i].position += circles[i].velocity * deltaTime;
-		circles[i].color = ivec3(std::min(int(abs(circles[i].velocity.x) * 2), 255), int(circles[i].position.x / maxBounds.x * 255), std::min(int(abs(circles[i].velocity.y) * 2), 255));
+		circles[i].color = ivec3(getPattern(circles[i].position, 128, deltaTime) * 255.0f);
+		#pragma critical
 		checkBoundingBoxCollision(circles[i], minBounds, maxBounds);
 	}
 }
