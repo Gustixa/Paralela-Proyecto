@@ -34,6 +34,8 @@ int main(int argc, char* argv[]) {
 		}
 		render(circles);
 	}
+	delete window;
+	delete renderer;
 	return 0;
 }
 
