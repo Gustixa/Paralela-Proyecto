@@ -82,49 +82,32 @@ vector<Circle> initializeCircles(const uint16_t& numCircles, const uint16_t resx
 	return circles;
 }
 
-void checkBoundingBoxCollision(Circle& circle, const vec2& minBounds, const vec2& maxBounds) {
+void checkBoundingBoxCollision(Circle& circle, const vec2& bounds) {
 	for (int i = 0; i < 2; ++i) {
-		if (circle.position[i] - circle.radius < minBounds[i]) {
-			circle.position[i] = minBounds[i] + circle.radius;
+		if (circle.position[i] - circle.radius < 0) {
+			circle.position[i] = 0 + circle.radius;
 			circle.velocity[i] = -circle.velocity[i];
 		}
-		else if (circle.position[i] + circle.radius > maxBounds[i]) {
-			circle.position[i] = maxBounds[i] - circle.radius;
+		else if (circle.position[i] + circle.radius > bounds[i]) {
+			circle.position[i] = bounds[i] - circle.radius;
 			circle.velocity[i] = -circle.velocity[i];
 		}
 	}
 }
 
-vec3 palette(const float& time) {
-	vec3 d = vec3(0.263, 0.416, 0.557);
-	return cos(2.5f * (time + d));
-}
-
-vec3 getPattern(vec2 uv, const float& steps, const float& time) {
-	vec2 uv_0 = uv;
+vec3 getPattern(const vec2& position, const vec2& bounds, const float& steps, const float& time) {
 	vec3 val = vec3(0.0);
 	for (float i = 0.0f; i < steps; i++) {
-		uv = glm::fract(uv * 1.5f) - 0.5f;
-
-		float d = length(uv) * exp(-length(uv_0));
-		vec3 col = palette(length(uv_0) + i * 0.4f + time * 0.4f);
-
-		d = sin(d * 8.0f + time) / 8.0f;
-		d = abs(d);
-
-		d = pow(0.01f / d, 1.2f);
-
-		val += col * d;
 	}
-	return val;
+	return vec3(position.x / bounds.x, position.y / bounds.y, 0);
 }
 
-void simulateStep(vector<Circle>& circles, const vec2& minBounds, const vec2& maxBounds, const float& deltaTime) {
+void simulateStep(vector<Circle>& circles, const vec2& bounds, const float& deltaTime) {
 	#pragma omp parallel for
 	for (int i = 0; i < circles.size(); ++i) {
 		circles[i].position += circles[i].velocity * deltaTime;
-		circles[i].color = ivec3(getPattern(circles[i].position, 128, deltaTime) * 255.0f);
+		circles[i].color = ivec3(getPattern(circles[i].position, bounds, 128, deltaTime) * 255.0f);
 		#pragma critical
-		checkBoundingBoxCollision(circles[i], minBounds, maxBounds);
+		checkBoundingBoxCollision(circles[i], bounds);
 	}
 }

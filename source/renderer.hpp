@@ -17,8 +17,7 @@ struct Circle {
 const int maxIterations=6;
 
 vector<Circle> initializeCircles(const uint16_t& numCircles, const uint16_t resx, const uint16_t resy);
-void checkBoundingBoxCollision(Circle& circle, const vec2& minBounds, const vec2& maxBounds);
+void checkBoundingBoxCollision(Circle& circle, const vec2& bounds);
 
-vec3 palette(const float& time);
-vec3 getPattern(vec2 uv, const float& steps, const float& time);
-void simulateStep(vector<Circle>& circles, const vec2& minBounds, const vec2& maxBounds, const float& deltaTime);
+vec3 getPattern(const vec2& position, const vec2& bounds, const float& steps, const float& time);
+void simulateStep(vector<Circle>& circles, const vec2& bounds, const float& deltaTime);
