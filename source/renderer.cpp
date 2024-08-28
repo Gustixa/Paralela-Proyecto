@@ -75,7 +75,7 @@ vector<Circle> initializeCircles(const uint16_t& numCircles, const uint16_t resx
 	for (uint16_t i = 0; i < numCircles; ++i) {
 		circles[i].position = vec2(rand() % resx, rand() % resy);
 		circles[i].velocity = vec2((rand() % 500) - 250, (rand() % 500) - 250);
-		circles[i].radius = (rand() % 10) + 1;
+		circles[i].radius = (rand() % 6) + 1;
 		circles[i].mass = pi<float>() * pow(circles[i].radius, 2);
 		circles[i].color = ivec3(255,255,255);
 	}
@@ -95,18 +95,30 @@ void checkBoundingBoxCollision(Circle& circle, const vec2& bounds) {
 	}
 }
 
-vec3 getPattern(const vec2& position, const vec2& bounds, const float& steps, const float& time) {
-	vec3 val = vec3(0.0);
-	for (float i = 0.0f; i < steps; i++) {
+vec3 getPattern(const vec2& position, const vec2& bounds, const float& radius, const float& deltaTime, const float& time) {
+	vec3 colorPattern = vec3(1.0);
+	vec2 normalizedPos = position / bounds;
+
+	colorPattern.x *= 1.0f - (radius * 0.05f);
+	colorPattern.y *= normalizedPos.x + (radius * 0.05f);
+
+	float z_val = 0.0;
+	for (int i = 0; i < 10000; i++) {
+		z_val += sin(time * 0.0001f) * 0.8f / 10000.0f;
 	}
-	return vec3(position.x / bounds.x, position.y / bounds.y, 0);
+
+	colorPattern.z *= z_val;
+
+	return max(min(colorPattern, vec3(1)), vec3(0));
 }
 
-void simulateStep(vector<Circle>& circles, const vec2& bounds, const float& deltaTime) {
+void simulateStep(vector<Circle>& circles, const vec2& bounds, const float& deltaTime, const float& time) {
 	#pragma omp parallel for
 	for (int i = 0; i < circles.size(); ++i) {
 		circles[i].position += circles[i].velocity * deltaTime;
-		circles[i].color = ivec3(getPattern(circles[i].position, bounds, 128, deltaTime) * 255.0f);
+		const float pulsate = 1.0f + sin(time * 0.001f * (circles[i].position.x / bounds.x) * (circles[i].position.y / bounds.y)) * 0.8f;
+		circles[i].display_radius = circles[i].radius * pulsate;
+		circles[i].color = ivec3(getPattern(circles[i].position, bounds, circles[i].display_radius, deltaTime, time) * 255.0f);
 		#pragma critical
 		checkBoundingBoxCollision(circles[i], bounds);
 	}

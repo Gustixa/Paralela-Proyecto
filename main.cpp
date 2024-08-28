@@ -4,8 +4,8 @@
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
 
-const uint16_t RESX = 1800;
-const uint16_t RESY = 1000;
+const uint16_t RESX = 1000;
+const uint16_t RESY = 600;
 const uint16_t numCircles = 2048;
 
 double update_time = 0.2;
@@ -43,6 +43,10 @@ void init(const uint16_t RESX, const uint16_t RESY) {
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 }
 
+vec2 rot(vec2 uv,float a){
+	return vec2(uv.x*cos(a)-uv.y*sin(a),uv.y*cos(a)+uv.x*sin(a));
+}
+
 void render(vector<Circle>& circles) {
 	current_time = clock();
 	delta_time = float(current_time - last_time) / CLOCKS_PER_SEC;
@@ -62,30 +66,32 @@ void render(vector<Circle>& circles) {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 
+	const int maxIterations = 6;
+	const ivec2 start = ivec2((RESX / 2) - (RESX / 10), (RESY / 2) - (RESY / 10));
+	const ivec2 end   = ivec2((RESX / 2) + (RESX / 10), (RESY / 2) + (RESY / 10));
 
+	#pragma omp parallel for collapse(2)
+	for (int x = start.x; x < end.x; x++) {
+		for (int y = start.y; y < end.y; y++) {
+			vec2 uv = (vec2(x,y) - (vec2(RESX, RESY) / 2.0f)) / float(RESX) * 10.0f;
+			uv *= sin(float(run_time)) * 0.5f + 1.5f;
+	
+			for(int i = 0; i < maxIterations; i++){
+				uv *= 2.1f;
+				uv = rot(uv, run_time);
+				uv = abs(uv);
+				uv -= 0.5f;
+			}
+	
+			#pragma omp critical
+			if (length(uv) <= 0.4f)
+				renderPoint(renderer, RESX, RESY, uvec2(x,y), ivec3(255));
+		}
+	}
 
-	//const int maxIterations = 8;
-	//#pragma omp parallel for collapse(2)
-	//for (int x = 0; x < RESX; x++) {
-	//	for (int y = 0; y < RESY; y++) {
-	//		vec2 uv = (vec2(x,y) - (vec2(RESX, RESY) / 2.0f)) / float(RESX);
-	//		uv *= sin(float(run_time)) * 0.5f + 1.5f;
-	//
-	//		for(int i = 0; i < maxIterations; i++){
-	//			uv *= 2.1f;
-	//			uv = rot(run_time) * uv;
-	//			uv = abs(uv);
-	//			uv -= 0.5f;
-	//		}
-	//
-	//		#pragma omp critical
-	//		renderPoint(renderer, RESX, RESY, uvec2(x,y), static_cast<ivec3>(vec3(length(uv) < 0.4f) * 255.0f));
-	//	}
-	//}
-
-	simulateStep(circles, vec2(RESX, RESY), delta_time);
+	simulateStep(circles, vec2(RESX, RESY), delta_time, current_time);
 	for (const Circle& circle : circles) {
-		renderCircle(renderer, RESX, RESY, static_cast<uvec2>(circle.position), circle.radius, circle.color);
+		renderCircle(renderer, RESX, RESY, static_cast<uvec2>(circle.position), circle.display_radius, circle.color);
 	}
 
 

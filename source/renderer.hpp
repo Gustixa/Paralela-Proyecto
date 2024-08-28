@@ -11,13 +11,12 @@ struct Circle {
 	vec2 velocity;
 	ivec3 color;
 	float radius;
+	float display_radius;
 	float mass;
 };
-
-const int maxIterations=6;
 
 vector<Circle> initializeCircles(const uint16_t& numCircles, const uint16_t resx, const uint16_t resy);
 void checkBoundingBoxCollision(Circle& circle, const vec2& bounds);
 
-vec3 getPattern(const vec2& position, const vec2& bounds, const float& steps, const float& time);
-void simulateStep(vector<Circle>& circles, const vec2& bounds, const float& deltaTime);
+vec3 getPattern(const vec2& position, const vec2& bounds, const float& radius, const float& deltaTime, const float& time);
+void simulateStep(vector<Circle>& circles, const vec2& bounds, const float& deltaTime, const float& time);
